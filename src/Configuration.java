@@ -7,7 +7,7 @@ public class Configuration
     //Setup
     public Properties properties;
     public String propertiesFile = "propertiesFiles/DMBProperties.properties";
-    public LogFileWriter logWriter;
+    //public LogFileWriter logWriter;
 
 
     //Attributes
@@ -65,7 +65,7 @@ public class Configuration
                 p.close();
             }
 
-            logWriter = new LogFileWriter(logFile);
+            //logWriter = new LogFileWriter(logFile);
         }
         catch (NumberFormatException e)
         {
