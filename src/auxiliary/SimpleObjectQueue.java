@@ -1,4 +1,6 @@
-import Exceptions.*;
+package auxiliary;
+
+import exceptions.*;
 public class SimpleObjectQueue 
 {
 
@@ -10,13 +12,13 @@ public class SimpleObjectQueue
   private int count = 0;
   private String id = "";
 
-  SimpleObjectQueue(String id) 
+  public SimpleObjectQueue(String id) 
   {
     id = id;
     queue = new Object[size];
   }
 
-  SimpleObjectQueue(String id, int n) 
+  public SimpleObjectQueue(String id, int n) 
   {
     id = id;
     if (n > 1) { size = n; }

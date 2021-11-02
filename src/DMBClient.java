@@ -2,6 +2,9 @@
 import java.io.*;
 import java.net.*;
 
+import auxiliary.*;
+import exceptions.*;
+
 /**
   * Daily Message Board Client
   *

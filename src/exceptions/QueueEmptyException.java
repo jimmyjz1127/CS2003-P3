@@ -4,7 +4,7 @@
  * Original concept, Colin Allison.
  *
  */
-package Exceptions;
+package exceptions;
 public class QueueEmptyException extends Exception {
   public QueueEmptyException() { }
   public QueueEmptyException(String s) { super(s); }

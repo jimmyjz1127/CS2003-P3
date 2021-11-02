@@ -6,6 +6,7 @@
   *
   */
 
+package webpage;
 import java.io.*;
 
 public class DirAndFile 
@@ -13,7 +14,8 @@ public class DirAndFile
 
   public static void createDirAndFile(String dirName, String fileName, String text)
   {
-
+    dirName = (String) ("webpage/" + dirName);
+    System.out.println(dirName);
     File dir = new File(dirName);
 
     // if (dir.exists()) 
@@ -55,5 +57,11 @@ public class DirAndFile
     }
 
     System.out.println("++ Wrote \"" + text + "\" to file: " + fileName);
+  }
+
+  public static void main(String[] args)
+  {
+    createDirAndFile("testDirectory", "testFile", "testMessage");
+    //File file = new File("")
   }
 }

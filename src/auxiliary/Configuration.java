@@ -1,3 +1,6 @@
+package auxiliary;
+
+import exceptions.*;
 import java.io.*;
 import java.net.*;
 import java.util.Properties;

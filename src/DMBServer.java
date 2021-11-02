@@ -1,7 +1,9 @@
 import java.io.*;
 import java.net.*;
 
-import Exceptions.*;
+import exceptions.*;
+import webpage.*;
+import auxiliary.*;
 
 public class DMBServer
 {
