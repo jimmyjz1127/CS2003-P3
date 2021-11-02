@@ -21,7 +21,7 @@ public class DMBClient
   public static void main(String[] args)
   {
 
-    c_ = new Configuration("propertiesFiles/cs2003-net2.properties");
+    c_ = new Configuration("propertiesFiles/DMBProperties.properties");
 
     try 
     {

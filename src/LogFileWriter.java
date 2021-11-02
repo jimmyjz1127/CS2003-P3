@@ -9,7 +9,7 @@ public class LogFileWriter
 
     public LogFileWriter(String fileName)
     {
-        File logFile = new File(filename);
+        File logFile = new File(fileName);
         sdf = new SimpleDateFormat(new String("yyyyMMdd-HHmmss.SSS"));
 
         try
@@ -21,7 +21,7 @@ public class LogFileWriter
             else
             {
                 logFile.createNewFile();
-                fileWriter = new FileWriter(filename, true);
+                fileWriter = new FileWriter(fileName, true);
             }
         }
         catch (Exception e)
@@ -41,7 +41,7 @@ public class LogFileWriter
         {
             String now = sdf.format(new Date());
             String logEntry = new String(now.toString() + "| " + logRequest + "\n");
-            fileWriter.write(logEntry, 0 logEntry.length());
+            fileWriter.write(logEntry, 0, logEntry.length());
             fileWriter.flush();
             if (stdout)
             {

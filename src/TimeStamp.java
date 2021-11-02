@@ -12,15 +12,32 @@ import java.text.*;
 
 public class TimeStamp 
 {
+  private Date d;
+  private String dtf;
+  private String df;
+  private SimpleDateFormat sdtf;
+  private SimpleDateFormat sdf;
+  private String dateTime;
+  private String date;
 
-  public static void main(String[] args) 
+  public TimeStamp()
   {
-    Date               d = new Date();
-    String            df = new String("yyyy-MM-dd_HH-mm-ss.SSS");
-    SimpleDateFormat sdf = new SimpleDateFormat(df);
-    String             s = sdf.format(d);
-    String             u = System.getProperty("user.name");
+    d = new Date();
+    dtf = new String("yyyy-MM-dd_HH-mm-ss.SSS");
+    df = new String("yyyy-MM-dd");
+    sdtf = new SimpleDateFormat(dtf);
+    sdf = new SimpleDateFormat(df);
+    dateTime = sdtf.format(d);
+    date = sdf.format(d);
+  }
 
-    System.out.println("Hello, " + u + ", the time is : " + s);
+  public String getSimpleDateFormat()
+  {
+    return date;
+  }
+
+  public String getSimpleDateTimeFormat()
+  {
+    return dateTime;
   }
 }

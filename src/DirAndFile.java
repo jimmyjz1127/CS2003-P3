@@ -11,35 +11,27 @@ import java.io.*;
 public class DirAndFile 
 {
 
-  public static void main(String[] args) 
+  public static void createDirAndFile(String dirName, String fileName, String text)
   {
-    if (args.length != 1) 
-    {
-      System.out.println("  usage:\n java DirAndFile <word>");
-      System.exit(0);
-    }
-
-    String dirName = new String(args[0]);
-    String fileName = new String(args[0]);
-    String text = new String(args[0]);
 
     File dir = new File(dirName);
 
-    if (dir.exists()) 
-    {
-      System.out.println("++ File already exists: " + dirName);
-      System.exit(0);
-    }
+    // if (dir.exists()) 
+    // {
+    //   System.out.println("++ File already exists: " + dirName);
+    //   System.exit(0);
+    // }
 
-    if (dir.mkdir()) 
+    if (!dir.exists()) 
     {
+      dir.mkdir();
       System.out.println("++ Created directory: " + dirName);
     }
-    else 
-    {
-      System.out.println("++ Failed to create directory: " + dirName);
-      System.exit(0);
-    }
+    // else 
+    // {
+    //   System.out.println("++ Failed to create directory: " + dirName);
+    //   System.exit(0);
+    // }
 
     fileName = dirName + File.separator + fileName;
     File file = new File(fileName);

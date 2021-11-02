@@ -7,7 +7,7 @@ public class Configuration
     //Setup
     public Properties properties;
     public String propertiesFile = "propertiesFiles/DMBProperties.properties";
-    //public LogFileWriter logWriter;
+    public LogFileWriter logFileWriter;
 
 
     //Attributes
@@ -15,7 +15,9 @@ public class Configuration
     public int serverPort;
     public String directoryFile;
     public String boardDirectory;
-    public String logFile;
+    public String logFile = "cs2003-net2.log";
+    public int maxClients;
+    public int maxMessages;
 
     public Configuration(String file)
     {
@@ -62,10 +64,20 @@ public class Configuration
                     logFile = new String(property);
                 }
 
+                if ((property = properties.getProperty("maxClients")) != null)
+                {
+                    maxClients = Integer.parseInt(property);
+                }
+
+                if ((property = properties.getProperty("maxMessages")) != null)
+                {
+                    maxMessages = Integer.parseInt(property);
+                }
+
                 p.close();
             }
 
-            //logWriter = new LogFileWriter(logFile);
+            logFileWriter = new LogFileWriter(logFile);
         }
         catch (NumberFormatException e)
         {
