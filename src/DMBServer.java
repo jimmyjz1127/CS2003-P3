@@ -71,7 +71,7 @@ public class DMBServer
         setupConfiguration();
         startServer();
 
-        while(true) //CTRL-C to quit server
+        while(true)
         {
             Socket client = null;
             try
