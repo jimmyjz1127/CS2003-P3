@@ -5,10 +5,10 @@ import exceptions.*;
 import messageboard.*;
 import auxiliary.*;
 
-public class DMBServer
+public class DMBServer1
 {
     private static Configuration configuration;
-
+    
     private static int port;
     private static ServerSocket serverSocket;
     private static SimpleObjectQueue clientQ;
@@ -65,13 +65,13 @@ public class DMBServer
         messageQ = new SimpleObjectQueue("MessageQ", maxMessages);
         timeStampQ = new SimpleObjectQueue("timeStampQ", maxMessages);
     }
-
+    //start server and execute protocol
     public static void main(String[] args)
     {
         setupConfiguration();
         startServer();
 
-        while(true) //CTRL-C to quit server
+        while(true)// CTRL-C to quit server 
         {
             Socket client = null;
             try
@@ -96,7 +96,7 @@ public class DMBServer
                     TimeStamp timeStamp = new TimeStamp();
                     timeStampQ.add(timeStamp);
                 }
-
+                //Check transmissions from each client
                 for (int i = 0; i < clientQ.size(); i++)
                 {
                     Socket c = (Socket) clientQ.get(i);
@@ -104,16 +104,19 @@ public class DMBServer
                     if (c != null)
                     {
                         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(c.getInputStream()));
-
+                       
                         String message = bufferedReader.readLine();
-
+                        
                         if (message != null)
                         {
-                            messageQ.add(message);
+                            messageQ.add("from " + message);
+
                             clientQ.delete(c);
                         }
+                        
                     }
                 }
+                //iterate through all messages sent to server
                 while (!messageQ.isEmpty())
                 {
                     String message = (String) messageQ.remove();
@@ -122,7 +125,9 @@ public class DMBServer
                     String date = timeStamp.getSimpleDateFormat();
                     String dateAndTime = timeStamp.getSimpleDateTimeFormat();
                     
+                    //create directory and file for message
                     DirAndFile.createDirAndFile(date, dateAndTime, message);
+
                     System.out.println("Message File Created: " + date + "/" + dateAndTime + "\n\n");
                 }
 
