@@ -13,7 +13,7 @@ import exceptions.*;
   * based on code by Saleem Bhatti, 28 Aug 2019
   *
   */
-public class DMBClient1 
+public class DMBClientExt
 {
     static HashMap<String,Integer> userMap = new HashMap<String, Integer>();
 
@@ -26,10 +26,10 @@ public class DMBClient1
 
     public static void main(String[] args)
     {
-        byte[]       buffer;
-        String       line;
-        String       quit = new String("quit");
-        int          r;
+        byte[] buffer;
+        String pdu;
+        String quit = new String("quit");
+        int r;
         BufferedReader rx = null;
         PrintWriter tx = null;
         Socket connection = null;
@@ -42,91 +42,61 @@ public class DMBClient1
                 while (true)//CTRL-C to close connection
                 {
                     Scanner user = new Scanner(System.in);
-                    line = user.nextLine();
-                    String[] lineArr = line.split(" ", 3);
+                    pdu = user.nextLine();
+                    String[] pduArr = pdu.split(" ", 3);
                     
-                    if (lineArr.length != 3)
+                    if (pduArr.length == 3)
                     {
-                        System.out.println("Invalid Message! \n::to <username> <message>\n::fetch <username> <date>\n");
-                        continue;
-                    }
-                    else if (lineArr[0].equals("::to"))//send message
-                    {
-                        String username = lineArr[1];
-                        String message = lineArr[2];
-                        String pdu = System.getProperty("user.name") + " " + message;
-
-                        int userPort = 0;
-                        if (userMap.containsKey(username))//if username is a valid username
-                        {
-                            userPort = userMap.get(username);//retrive port number from map
-                        }
-                        else
+                        String username = pduArr[1];
+                        int port = 0;
+                        if (!userMap.containsKey(username))//if the given username is valid
                         {
                             System.out.println("Invalid Username!\n");
                             continue;
                         }
+                        else
+                        {
+                            port = userMap.get(username);
+                        }
 
-                        server = username + ".host.cs.st-andrews.ac.uk";
-
-                        connection = startClient(server, userPort);
+                        String hostname = username + ".host.cs.st-andrews.ac.uk";
+                        connection = startClient(hostname, port);
+                        if (connection == null)//if the server is closed 
+                        {
+                            System.out.println("Server Connction Closed!");
+                            continue;
+                        }
                         tx = new PrintWriter(connection.getOutputStream(), true);
                         rx = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
-                        r = message.length();
+                        //::to <client username> <message>
+                        String fullPDU = pduArr[0] + " " + System.getProperty("user.name") + " " + pduArr[2];
+
+                        r = fullPDU.length();
                         if (r > maxTextLen_) 
                         {
                             System.out.println("++ You entered more than " + maxTextLen_ + "bytes ... truncating.");
                             r = maxTextLen_;
                         }
-                        System.out.println("Sending " + r + " bytes\nS");
+                        System.out.println("Sending " + r + " bytes");
+                        tx.println(fullPDU);
 
-                        tx.println(pdu); //send message to server
-                        connection.close();
-                    }
-                    else if (lineArr[0].equals("::fetch"))//send fetch request 
-                    {
-                        String username = lineArr[1];
-                        String date = lineArr[2];
-                        String pdu = lineArr[0] + " " + date;
-
-                        int userPort = 0;
-                        if (userMap.containsKey(username))
-                        {
-                            userPort = userMap.get(username);
-                        }
-                        else
-                        {
-                            System.out.println("Invalid Username!\n");
-                            continue;
-                        }
-
-                        server = username + ".host.cs.st-andrews.ac.uk"; 
-                        
-                        connection = startClient(server, userPort);
-                        tx = new PrintWriter(connection.getOutputStream(), true);
-                        rx = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                        
-                        r = pdu.length();
-                        System.out.println("Sending " + r + " bytes\nS");
-                        tx.println(pdu);
-                        
                         String response;
-                        while ((response = rx.readLine()) != null)
+                        while ((response = rx.readLine()) != null)//read and print response from server
                         {
                             System.out.println(response);
                         }
                     }
                     else
                     {
-                        System.out.println("Invalid Message! \n::to <username> <message>\n::fetch <username> <date>\n");
+                        System.out.println("Invalid Format! \n::to <username> <message>\n::fetch <username> <date>\n");
                         continue;
                     }
                 }
             }
         
         }
-        catch (IOException e) {e.printStackTrace();}
+        catch (IOException e) {System.out.println(e);}
     } // main
 
     //sends request to server for connection

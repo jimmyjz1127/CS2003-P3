@@ -8,9 +8,9 @@ public class MessageFinder
     {
         String messages = "";
         File directory = new File("messageboard/" + date);
-        if (!directory.exists())
+        if (!directory.exists())//if there are no messages for given date
         {
-            return "No Messages for " + date;
+            return "::none";
         }
         else
         {

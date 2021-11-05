@@ -6,7 +6,7 @@ import exceptions.*;
 import messageboard.*;
 import auxiliary.*;
 
-public class DMBServer1
+public class DMBServerExt
 {
     private static Configuration configuration;
     
@@ -18,6 +18,8 @@ public class DMBServer1
     private static SimpleObjectQueue timeStampQ;
     private static SimpleObjectQueue fetchClientQ;
     private static SimpleObjectQueue fetchDateQ;
+    private static SimpleObjectQueue errorClientQ;
+    private static SimpleObjectQueue errorResponseQ;
 
     private static int maxClients;
     private static int maxMessages;
@@ -60,6 +62,8 @@ public class DMBServer1
         timeStampQ = new SimpleObjectQueue("timeStampQ", maxMessages);//for storing message timestamps
         fetchClientQ = new SimpleObjectQueue("fetchClientQ", maxClients);//for storing clients making a message fetch request
         fetchDateQ = new SimpleObjectQueue("fetchDateQ", maxClients);//for the dates of client fetch requests 
+        errorClientQ = new SimpleObjectQueue("errorClientQ", maxClients);//for clients who made invalid requests 
+        errorResponseQ = new SimpleObjectQueue("errorResponseQ", maxClients);//for response messagse to clients who made bad requests
     }
 
     //start server and execute protocol
@@ -83,9 +87,9 @@ public class DMBServer1
             {
                 if (client != null)
                 {
-                    clientQ.add(client);
+                    clientQ.add(client);//add client connection to queue
                     TimeStamp timeStamp = new TimeStamp();
-                    timeStampQ.add(timeStamp);
+                    timeStampQ.add(timeStamp);//add timestamp of client connection to queue
                 }
                 //Check transmissions from each client
                 for (int i = 0; i < clientQ.size(); i++)
@@ -96,57 +100,58 @@ public class DMBServer1
                     {
                         BufferedReader rx = new BufferedReader(new InputStreamReader(c.getInputStream()));
                        
-                        String message = rx.readLine();
-                        if (message != null)
+                        String pdu = rx.readLine();
+                        if (pdu != null)
                         {
-                            String[] messageArr = message.split(" ", 2);
-                            if (messageArr[0].equals("::fetch"))//if the client transmission is a message fetch request 
-                            {
-                                fetchClientQ.add(c);
-                                String date = messageArr[1];
-                                fetchDateQ.add(date);
-                            }
-                            else//if the client transmission is a message
-                            {
-                                messageQ.add("from " + message);
-                            }
-                            clientQ.delete(c);
+                            messageQ.add(pdu);//add message to queue
                         }
                         
                     }
                 }
-                //iterate through all messages sent to server
-                while (!messageQ.isEmpty())
+                //iterate through all clients and messages
+                while (!clientQ.isEmpty() && !messageQ.isEmpty())
                 {
-                    String message = (String) messageQ.remove();
-                    TimeStamp timeStamp = (TimeStamp) timeStampQ.remove();
+                    Socket c = (Socket) clientQ.remove();
+                    String pdu = (String) messageQ.remove();
+                    PrintWriter tx = new PrintWriter(new OutputStreamWriter(c.getOutputStream()));
 
-                    String date = timeStamp.getSimpleDateFormat();//Get the date part of timestamp YYYY-MM-DD
-                    String dateAndTime = timeStamp.getSimpleDateTimeFormat();//Get both the date and time YYYY-MM-DD_HH-mm-ss.SSS
-                    
-                    //create directory and file for message
-                    DirAndFile.createDirAndFile(date, dateAndTime, message);
-                }
-                //iterate through all fetch requests sent to server
-                while (!fetchClientQ.isEmpty() && !fetchDateQ.isEmpty())
-                {
-                    Socket fetchClient = (Socket) fetchClientQ.remove();
-                    String date = (String) fetchDateQ.remove();
-                    PrintWriter tx = new PrintWriter(new OutputStreamWriter(fetchClient.getOutputStream()));
-            
-                    if (Pattern.matches("^[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}$", date))
+                    String[] pduArr = pdu.split(" ", 3);
+                    if (pduArr.length == 3)
                     {
-                        String response = MessageFinder.findMessages(date);
-                        tx.println(response);
-                    }
-                    else
-                    {
-                        tx.println("::error\n");
-                    }
-                    tx.flush();
-                    tx.close();
-                }
+                        if (pduArr[0].equals("::to"))//if pdu from client is a message
+                        {
+                            TimeStamp timeStamp = (TimeStamp) timeStampQ.remove();
+                            String date = timeStamp.getSimpleDateFormat();//Get the date part of timestamp YYYY-MM-DD
+                            String dateAndTime = timeStamp.getSimpleDateTimeFormat();//Get both the date and time YYYY-MM-DD_HH-mm-ss.SSS
+                            String username = pduArr[1];
+                            String message = "::from " + pduArr[1] + " " + pduArr[2];
 
+                            //create directory and file for message
+                            DirAndFile.createDirAndFile(date, dateAndTime, message);
+                            tx.println("::received");
+                        }
+                        else if (pduArr[0].equals("::fetch"))//if pdu from client is a fetch request 
+                        {
+                            String date = pduArr[2];
+                            if (Pattern.matches("^[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}$", date))
+                            {
+                                String response = MessageFinder.findMessages(date);
+                                System.out.println("Sending retrieved messages");
+                                tx.println(response);
+                            }
+                            else
+                            {
+                                tx.println("::error");
+                            }
+                        }
+                        else//If pdu from client is neither a message or fetch request
+                        {
+                            tx.println("Invalid Format! Invalid Message! \n::to <username> <message>\n::fetch <username> <date>\n");
+                        }
+                        tx.flush();
+                        tx.close();
+                    }
+                }
             }
             catch (QueueFullException e) { System.err.println(e); }
             catch (QueueEmptyException e) { System.err.println(e); }
