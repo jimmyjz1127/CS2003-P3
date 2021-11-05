@@ -1,3 +1,8 @@
+/**
+  * Daily Message Board Server 
+  *
+  * based on code by Saleem Bhatti, 01 Oct 2019
+ */
 import java.io.*;
 import java.net.*;
 import java.util.regex.*;
@@ -16,10 +21,6 @@ public class DMBServerExt
     private static SimpleObjectQueue clientQ;
     private static SimpleObjectQueue messageQ;
     private static SimpleObjectQueue timeStampQ;
-    private static SimpleObjectQueue fetchClientQ;
-    private static SimpleObjectQueue fetchDateQ;
-    private static SimpleObjectQueue errorClientQ;
-    private static SimpleObjectQueue errorResponseQ;
 
     private static int maxClients;
     private static int maxMessages;
@@ -60,10 +61,6 @@ public class DMBServerExt
         clientQ = new SimpleObjectQueue("ClientQ", maxClients);//for storing clients sending messages to server
         messageQ = new SimpleObjectQueue("MessageQ", maxMessages);//for storing client messages
         timeStampQ = new SimpleObjectQueue("timeStampQ", maxMessages);//for storing message timestamps
-        fetchClientQ = new SimpleObjectQueue("fetchClientQ", maxClients);//for storing clients making a message fetch request
-        fetchDateQ = new SimpleObjectQueue("fetchDateQ", maxClients);//for the dates of client fetch requests 
-        errorClientQ = new SimpleObjectQueue("errorClientQ", maxClients);//for clients who made invalid requests 
-        errorResponseQ = new SimpleObjectQueue("errorResponseQ", maxClients);//for response messagse to clients who made bad requests
     }
 
     //start server and execute protocol
@@ -128,7 +125,7 @@ public class DMBServerExt
 
                             //create directory and file for message
                             DirAndFile.createDirAndFile(date, dateAndTime, message);
-                            tx.println("::received");
+                            tx.println("::received\n");
                         }
                         else if (pduArr[0].equals("::fetch"))//if pdu from client is a fetch request 
                         {
@@ -136,12 +133,12 @@ public class DMBServerExt
                             if (Pattern.matches("^[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}$", date))
                             {
                                 String response = MessageFinder.findMessages(date);
-                                System.out.println("Sending retrieved messages");
+                                System.out.println("Sending retrieved messages\n");
                                 tx.println(response);
                             }
                             else
                             {
-                                tx.println("::error");
+                                tx.println("::error\n");
                             }
                         }
                         else//If pdu from client is neither a message or fetch request

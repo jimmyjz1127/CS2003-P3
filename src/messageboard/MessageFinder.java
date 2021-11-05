@@ -1,7 +1,6 @@
 package messageboard;
 import java.io.*;
 
-
 public class MessageFinder
 {
     public static String findMessages(String date)
@@ -10,7 +9,7 @@ public class MessageFinder
         File directory = new File("messageboard/" + date);
         if (!directory.exists())//if there are no messages for given date
         {
-            return "::none";
+            return "::none\n";
         }
         else
         {
