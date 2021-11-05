@@ -44,7 +44,7 @@ public class DirAndFile
       System.out.println("IOException - write(): " + e.getMessage());
     }
 
-    System.out.println("++ Wrote \"" + text + "\" to file: " + fileName);
+    System.out.println("++ Wrote \"" + text + "\" to file: " + fileName + "\n");
   }
 
   public static void main(String[] args)

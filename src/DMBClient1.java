@@ -26,13 +26,8 @@ public class DMBClient1
 
     public static void main(String[] args)
     {
-        //Socket       connection;
-        PrintWriter  ptx;
-        OutputStream tx;
-        InputStream  rx;
         byte[]       buffer;
         String       line;
-        String       s = new String("");
         String       quit = new String("quit");
         int          r;
 
@@ -41,38 +36,39 @@ public class DMBClient1
             setupUsers();
             if (args.length == 0)
             {
-                boolean keepConnection = true;
                 while (true)//CTRL-C to close connection
                 {
                     Scanner user = new Scanner(System.in);
                     line = user.nextLine();
-                    if (line.substring(0,4).equals("::to "))
+                    String[] lineArr = line.split(" ", 3);
+                    
+                    if (lineArr.length != 3)
                     {
-                        
-                        int usernameIndex = line.indexOf(" ");//index of the start of username of input string
-                        String usernameAndMessage = line.substring(usernameIndex + 1);
-                        int messageIndex = usernameAndMessage.indexOf(" ") + usernameIndex;
-                        String username = line.substring(usernameIndex + 1, messageIndex + 1);//username only
-                        String message = line.substring(messageIndex+1);//message only 
-                        String fullMessage = System.getProperty("user.name") + " " + message;//append username to message 
-                        
+                        System.out.println("Invalid Message! \n::to <username> <message>\n::fetch <username> <date>\n");
+                        continue;
+                    }
+                    else if (lineArr[0].equals("::to"))//send message
+                    {
+                        String username = lineArr[1];
+                        String message = lineArr[2];
+                        String pdu = System.getProperty("user.name") + " " + message;
+
                         int userPort = 0;
-                       
                         if (userMap.containsKey(username))//if username is a valid username
                         {
                             userPort = userMap.get(username);//retrive port number from map
                         }
                         else
                         {
-                            System.out.println("Invalid Username!");
+                            System.out.println("Invalid Username!\n");
                             continue;
                         }
 
                         server = username + ".host.cs.st-andrews.ac.uk";
 
                         Socket connection = startClient(server, userPort);
-                        ptx = new PrintWriter(connection.getOutputStream(), true);
-                        rx = connection.getInputStream();
+                        PrintWriter tx = new PrintWriter(connection.getOutputStream(), true);
+                        BufferedReader rx = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                     
                         r = message.length();
                         if (r > maxTextLen_) 
@@ -82,22 +78,52 @@ public class DMBClient1
                         }
                         System.out.println("Sending " + r + " bytes");
 
-                        ptx.println(fullMessage); //send message to server
+                        tx.println(pdu); //send message to server
                         connection.close();
+                    }
+                    else if (lineArr[0].equals("::fetch"))//send fetch request 
+                    {
+                        String username = lineArr[1];
+                        String date = lineArr[2];
+                        String pdu = lineArr[0] + " " + date;
+
+                        int userPort = 0;
+                        if (userMap.containsKey(username))
+                        {
+                            userPort = userMap.get(username);
+                        }
+                        else
+                        {
+                            System.out.println("Invalid Username!\n");
+                            continue;
+                        }
+
+                        server = username + ".host.cs.st-andrews.ac.uk"; 
+                        
+                        Socket connection = startClient(server, userPort);
+                        PrintWriter tx = new PrintWriter(connection.getOutputStream(), true);
+                        BufferedReader rx = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        
+                        r = pdu.length();
+                        System.out.println("Sending " + r + " bytes");
+                        tx.println(pdu);
+                        
+                        String response;
+                        while ((response = rx.readLine()) != null)
+                        {
+                            System.out.println(response);
+                        }
                     }
                     else
                     {
-                        System.out.println("Invalid Message! ::to <username> <message>");
+                        System.out.println("Invalid Message! \n::to <username> <message>\n::fetch <username> <date>\n");
                         continue;
                     }
                 }
             }
         
         }
-        catch (IOException e) 
-        {
-            System.err.println("IO Exception: " + e.getMessage());
-        }
+        catch (IOException e) {e.printStackTrace();}
     } // main
 
     //sends request to server for connection
@@ -115,18 +141,10 @@ public class DMBClient1
 
             connection = new Socket(address, port); // make a socket
 
-        System.out.println("++ Connecting to " + hostname + ":" + port + " -> " + connection);
+            System.out.println("++ Connecting to " + hostname + ":" + port + " -> " + connection);
         }
-
-        catch (UnknownHostException e) 
-        {
-        System.err.println("UnknownHost Exception: " + hostname + " "
-                            + e.getMessage());
-        }
-        catch (IOException e) 
-        {
-        System.err.println("IO Exception: " + e.getMessage());
-        }
+        catch (UnknownHostException e) {e.printStackTrace();}
+        catch (IOException e) {e.printStackTrace();}
 
         return connection;
     } // startClient
@@ -146,10 +164,7 @@ public class DMBClient1
                 userMap.put((String) keyValue[0], Integer.parseInt(keyValue[1]));
             }
         }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        catch (IOException e){e.printStackTrace();}
     }
 
 } // DMBClient

@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.regex.*;
 
 import exceptions.*;
 import messageboard.*;
@@ -11,9 +12,13 @@ public class DMBServer1
     
     private static int port;
     private static ServerSocket serverSocket;
+
     private static SimpleObjectQueue clientQ;
     private static SimpleObjectQueue messageQ;
     private static SimpleObjectQueue timeStampQ;
+    private static SimpleObjectQueue fetchClientQ;
+    private static SimpleObjectQueue fetchDateQ;
+
     private static int maxClients;
     private static int maxMessages;
     private static LogFileWriter logFileWriter;
@@ -21,7 +26,6 @@ public class DMBServer1
     private static String boardDirectory;
     private static String directoryFile;
 
-    private static final String terminationPhrase = "!bye!";
     /**
      * Imports all necessary configuration details and initializes respective class attributes
      */
@@ -39,32 +43,25 @@ public class DMBServer1
             boardDirectory = configuration.boardDirectory;
             directoryFile = configuration.directoryFile;
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        catch (Exception e){e.printStackTrace();}
     } 
 
     public static void startServer()
     {
-        // logFileWriter = new LogFileWriter(logFile);
-        // logFileWriter.writeLog("Logging Started.");
-
         try
         {
             serverSocket = new ServerSocket(port);
-            // logFileWriter.writeLog("Server socket started : " + serverSocket, true);
-            System.out.println("Server Started");
+            System.out.println("Server Started\n");
         }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        catch (IOException e){e.printStackTrace();}
 
-        clientQ = new SimpleObjectQueue("ClientQ", maxClients);
-        messageQ = new SimpleObjectQueue("MessageQ", maxMessages);
-        timeStampQ = new SimpleObjectQueue("timeStampQ", maxMessages);
+        clientQ = new SimpleObjectQueue("ClientQ", maxClients);//for storing clients sending messages to server
+        messageQ = new SimpleObjectQueue("MessageQ", maxMessages);//for storing client messages
+        timeStampQ = new SimpleObjectQueue("timeStampQ", maxMessages);//for storing message timestamps
+        fetchClientQ = new SimpleObjectQueue("fetchClientQ", maxClients);//for storing clients making a message fetch request
+        fetchDateQ = new SimpleObjectQueue("fetchDateQ", maxClients);//for the dates of client fetch requests 
     }
+
     //start server and execute protocol
     public static void main(String[] args)
     {
@@ -79,14 +76,8 @@ public class DMBServer1
                 client = serverSocket.accept();
                 System.out.println("Connection Accepted : " + client);
             }
-            catch (SocketTimeoutException e)
-            {
-                e.printStackTrace();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+            catch (SocketTimeoutException e){e.printStackTrace();}
+            catch (IOException e){e.printStackTrace();}
 
             try
             {
@@ -103,14 +94,22 @@ public class DMBServer1
 
                     if (c != null)
                     {
-                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(c.getInputStream()));
+                        BufferedReader rx = new BufferedReader(new InputStreamReader(c.getInputStream()));
                        
-                        String message = bufferedReader.readLine();
-                        
+                        String message = rx.readLine();
                         if (message != null)
                         {
-                            messageQ.add("from " + message);
-
+                            String[] messageArr = message.split(" ", 2);
+                            if (messageArr[0].equals("::fetch"))//if the client transmission is a message fetch request 
+                            {
+                                fetchClientQ.add(c);
+                                String date = messageArr[1];
+                                fetchDateQ.add(date);
+                            }
+                            else//if the client transmission is a message
+                            {
+                                messageQ.add("from " + message);
+                            }
                             clientQ.delete(c);
                         }
                         
@@ -120,15 +119,32 @@ public class DMBServer1
                 while (!messageQ.isEmpty())
                 {
                     String message = (String) messageQ.remove();
-                    
                     TimeStamp timeStamp = (TimeStamp) timeStampQ.remove();
-                    String date = timeStamp.getSimpleDateFormat();
-                    String dateAndTime = timeStamp.getSimpleDateTimeFormat();
+
+                    String date = timeStamp.getSimpleDateFormat();//Get the date part of timestamp YYYY-MM-DD
+                    String dateAndTime = timeStamp.getSimpleDateTimeFormat();//Get both the date and time YYYY-MM-DD_HH-mm-ss.SSS
                     
                     //create directory and file for message
                     DirAndFile.createDirAndFile(date, dateAndTime, message);
-
-                    System.out.println("Message File Created: " + date + "/" + dateAndTime + "\n\n");
+                }
+                //iterate through all fetch requests sent to server
+                while (!fetchClientQ.isEmpty() && !fetchDateQ.isEmpty())
+                {
+                    Socket fetchClient = (Socket) fetchClientQ.remove();
+                    String date = (String) fetchDateQ.remove();
+                    PrintWriter tx = new PrintWriter(new OutputStreamWriter(client.getOutputStream()));
+            
+                    if (Pattern.matches("^[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}$", date))
+                    {
+                        String response = MessageFinder.findMessages(date);
+                        tx.println(response);
+                    }
+                    else
+                    {
+                        tx.println("Invalid Date Format! YYYY-MM-DD\n");
+                    }
+                    tx.flush();
+                    tx.close();
                 }
 
             }

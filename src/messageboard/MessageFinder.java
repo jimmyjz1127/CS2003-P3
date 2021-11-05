@@ -7,15 +7,15 @@ public class MessageFinder
     public static String findMessages(String date)
     {
         String messages = "";
-        File directory = new File(date);
-        if (directory.exists())
+        File directory = new File("messageboard/" + date);
+        if (!directory.exists())
         {
             return "No Messages for " + date;
         }
         else
         {
             File[] files = directory.listFiles();
-            if (files != null)
+            if (files.length != 0)
             {
                 messages += "::messages " + date + "\n";
                 for (File file : files)
@@ -34,6 +34,7 @@ public class MessageFinder
                 }
             }
         }
+        System.out.println("Retrieved messages from: " + date + "\n");
         return messages;
     }
 }
