@@ -10,7 +10,7 @@ import java.net.*;
 import auxiliary.*;
 import exceptions.*;
 
-public class DMBClient 
+public class DMBSimpleClient 
 {
     private static int maxTextLen_ = 256;
     private static Configuration c_;

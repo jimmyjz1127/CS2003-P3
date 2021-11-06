@@ -10,7 +10,7 @@ import exceptions.*;
 import messageboard.*;
 import auxiliary.*;
 
-public class DMBServer
+public class DMBSimpleServer
 {
     private static Configuration configuration;
 
