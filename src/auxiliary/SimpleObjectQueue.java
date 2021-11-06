@@ -1,6 +1,13 @@
 package auxiliary;
+/**
+  SimpleObjectQueue for DMBServer and DMBServerExt
 
+  Saleem Bhatti, 01 Oct 2019.
+  Original concept, Colin Allison.
+
+*/
 import exceptions.*;
+
 public class SimpleObjectQueue 
 {
 

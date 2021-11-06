@@ -1,4 +1,9 @@
 package auxiliary;
+/**
+ * Configuration Information
+ *
+ * based on code written by Saleem Bhatti, Sep 2019
+ */
 
 import exceptions.*;
 import java.io.*;
@@ -10,7 +15,6 @@ public class Configuration
     //Setup
     public Properties properties;
     public String propertiesFile = "propertiesFiles/DMBProperties.properties";
-    public LogFileWriter logFileWriter;
 
 
     //Attributes
@@ -18,10 +22,13 @@ public class Configuration
     public int serverPort;
     public String directoryFile;
     public String boardDirectory;
-    public String logFile = "cs2003-net2.log";
     public int maxClients;
     public int maxMessages;
 
+    /**
+     * Sets up configuration information from properties file
+     * @param file : file path to properties file
+     */
     public Configuration(String file)
     {
         //if a different properties file is passed to constructor
@@ -62,11 +69,6 @@ public class Configuration
                     boardDirectory = new String(property);
                 }
 
-                if ((property = properties.getProperty("logFile")) != null)
-                {
-                    logFile = new String(property);
-                }
-
                 if ((property = properties.getProperty("maxClients")) != null)
                 {
                     maxClients = Integer.parseInt(property);
@@ -78,18 +80,11 @@ public class Configuration
                 }
 
                 p.close();
-            }
+            }//if
 
-            logFileWriter = new LogFileWriter(logFile);
-        }
-        catch (NumberFormatException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        }//try
+        catch (NumberFormatException e) {System.err.println("NumberFormatException: " + e.getMessage());}
+        catch (IOException e) {System.err.println("IOException: " + e.getMessage());}
         
-    }
+    }//Configuration constructor
 }

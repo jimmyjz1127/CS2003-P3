@@ -1,13 +1,11 @@
 package auxiliary;
-
 /**
-  * Simple example of a timestamp.
+  * TimeStamp object
   *
   * Saleem Bhatti, https://saleem.host.cs.st-andrews.ac.uk/
   * 28 Aug 2019
   *
   */
-
 import exceptions.*;
 import java.util.*;
 import java.text.*;

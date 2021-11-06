@@ -9,29 +9,26 @@ import java.net.*;
 import java.util.Scanner;
 import java.util.HashMap;
 
-
 import auxiliary.*;
 import exceptions.*;
+
 public class DMBClientExt
 {
     static HashMap<String,Integer> userMap = new HashMap<String, Integer>();//store username and ports
-    static int maxTextLen_ = 256;
-    static Configuration c_;
+    static int maxTextLen = 256;
     static String server; // FQDN
     static int port; //server port
 
     public static void main(String[] args)
     {
-        byte[] buffer;
-        String pdu;
-        int r;
+        String pdu;//full transmission text
         BufferedReader rx = null;
         PrintWriter tx = null;
         Socket connection = null;
 
         try 
         {
-            setupUsers();
+            setupUsers();//set up username and port number map
             
             while (true)//CTRL-C to close connection
             {
@@ -53,8 +50,8 @@ public class DMBClientExt
                         port = userMap.get(username);
                     }
 
-                    String hostname = username + ".host.cs.st-andrews.ac.uk";
-                    connection = startClient(hostname, port);
+                    String hostname = username + ".host.cs.st-andrews.ac.uk";//fqdn
+                    connection = startClient(hostname, port);//initiate connection with server
                     if (connection == null)//if the server is closed 
                     {
                             System.out.println("Server Connction Closed!");
@@ -66,32 +63,39 @@ public class DMBClientExt
                     //::to <client username> <message>
                     String fullPDU = pduArr[0] + " " + System.getProperty("user.name") + " " + pduArr[2];
 
-                    r = fullPDU.length();
-                    if (r > maxTextLen_) 
+                    //Check if pdu doesn't exceed the max length
+                    if (fullPDU.length() > maxTextLen) 
                     {
-                        System.out.println("++ You entered more than " + maxTextLen_ + "bytes ... truncating.");
-                        r = maxTextLen_;
+                        System.out.println("++ You entered more than " + maxTextLen + "bytes ... truncating.");
+                        fullPDU = fullPDU.substring(0,maxTextLen-1);
                     }
-                    System.out.println("Sending " + r + " bytes");
+                    
+                    //Send pdu to server
+                    System.out.println("Sending " + fullPDU.length() + " bytes");
                     tx.println(fullPDU);
 
+                    //Read response from server
                     String response;
                     while ((response = rx.readLine()) != null)//read and print response from server
                     {
                         System.out.println(response);
                     }
                 }
-                else
+                else//if pdu is of incorrect format
                 {
                     System.out.println("Invalid Format! \n::to <username> <message>\n::fetch <username> <date>\n");
                     continue;
                 }
-            }
-        }
-        catch (IOException e) {System.out.println(e);}
+            }//while
+        }//try
+        catch (IOException e) {System.out.println("IOException: " + e.getMessage());}
     } // main
 
-    //sends request to server for connection
+    /**
+     * Initiates connection with server by opening client socket
+     * @param hostname : the fqdn of server
+     * @param portnumber : port that server is running on
+     */
     static Socket startClient(String hostname, int portnumber)
     {
         Socket connection = null;
@@ -107,9 +111,9 @@ public class DMBClientExt
             
             System.out.println("++ Connecting to " + hostname + ":" + port + " -> " + connection);
         }
-        catch (ConnectException e) {}
-        catch (UnknownHostException e) {System.out.println(e);}
-        catch (IOException e) {System.out.println(e);}
+        catch (ConnectException e) {}//if server is closed - exception handling is done in main()
+        catch (UnknownHostException e) {System.out.println("UnknownHostException: " + e.getMessage());}
+        catch (IOException e) {System.out.println("IOException: " + e.getMessage());}
 
         return connection;
     } // startClient
@@ -129,7 +133,7 @@ public class DMBClientExt
                 userMap.put((String) keyValue[0], Integer.parseInt(keyValue[1]));
             }
         }
-        catch (IOException e){e.printStackTrace();}
-    }
+        catch (IOException e){System.err.println("IOException: " + e.getMessage());}
+    }//setupUsers
 
 } // DMBClient
