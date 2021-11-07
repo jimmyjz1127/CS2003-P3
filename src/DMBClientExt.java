@@ -36,7 +36,7 @@ public class DMBClientExt
                 pdu = user.nextLine();
                 String[] pduArr = pdu.split(" ", 3);
                 
-                if (pduArr.length == 3)
+                if (pduArr.length >= 2)
                 {
                     String username = pduArr[1];
                     int port = 0;
@@ -60,8 +60,15 @@ public class DMBClientExt
                     tx = new PrintWriter(connection.getOutputStream(), true);
                     rx = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
-                    //::to <client username> <message>
-                    String fullPDU = pduArr[0] + " " + System.getProperty("user.name") + " " + pduArr[2];
+                    String fullPDU = null;
+                    if (pduArr.length == 3)//for format <::to/::fetch> <client username> <date/message>
+                    {
+                        fullPDU = pduArr[0] + " " + System.getProperty("user.name") + " " + pduArr[2];
+                    }
+                    else //for format <::fetch> <client username> 
+                    {
+                        fullPDU = pduArr[0] + " " + System.getProperty("user.name");
+                    }
 
                     //Check if pdu doesn't exceed the max length
                     if (fullPDU.length() > maxTextLen) 

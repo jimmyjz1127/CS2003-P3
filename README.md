@@ -15,8 +15,7 @@ FILE DESCRIPTIONS:
         - TimeStamp.java : time stamp object  
     
     messageboard/ : contains all files pertaining to the message board creation and data retrieval (used by client-server files)
-        - DirAndFile.java : Used by server to create directories and Files for messages sent to server 
-        - MessageFinder.java : Used by server to retrieve messages from their files and directories
+        - DirAndFile.java : Used by server to create directories and Files for messages sent to server and for retrieving messages from their files and directories
         - index.php : generates and updates the message board webpage
         - messageBoard/ also contains all directories containing message files
 
@@ -89,7 +88,5 @@ CS2003-P3/
     │   ├── DirAndFile.class
     │   ├── DirAndFile.java
     │   ├── index.php
-    │   ├── MessageFinder.class
-    │   └── MessageFinder.java
     └── propertiesFiles/
         └── DMBProperties.properties

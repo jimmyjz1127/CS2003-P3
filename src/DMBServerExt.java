@@ -19,7 +19,7 @@ public class DMBServerExt
     private static ServerSocket serverSocket;
 
     private static SimpleObjectQueue clientQ;//Queue for client connections
-    private static SimpleObjectQueue messageQ;//Queue for transmission sent through client connections
+    private static SimpleObjectQueue pduQ;//Queue for the content of the transmission sent through client connections (date/message)
     private static SimpleObjectQueue timeStampQ;//Queue for time stamps of client connections
 
     private static int maxClients;//max number of clients that can be connected to server at any time
@@ -64,22 +64,22 @@ public class DMBServerExt
                         String pdu = rx.readLine();
                         if (pdu != null)
                         {
-                            messageQ.add(pdu);//add message to queue
+                            pduQ.add(pdu);//add message to queue
                         }
                         
                     }
                 }
                 //check transmission for each client
-                while (!clientQ.isEmpty() && !messageQ.isEmpty())
+                while (!clientQ.isEmpty() && !pduQ.isEmpty())
                 {
                     Socket c = (Socket) clientQ.remove();
-                    String pdu = (String) messageQ.remove();
+                    String pdu = (String) pduQ.remove();
                     PrintWriter tx = new PrintWriter(new OutputStreamWriter(c.getOutputStream()));
 
                     String[] pduArr = pdu.split(" ", 3);
-                    if (pduArr.length == 3)//check transmission has proper format <::fetch/::to> <username> <message/date>
+                    if (pduArr.length >= 2)//check transmission has proper format <::fetch/::to> <username> <message/date(optiona)>
                     {
-                        if (pduArr[0].equals("::to"))//if pdu from client is a message
+                        if (pduArr[0].equals("::to") && pduArr.length == 3)//if PDU is ::to command
                         {
                             TimeStamp timeStamp = (TimeStamp) timeStampQ.remove();
                             String date = timeStamp.getSimpleDateFormat();//Get the date part of timestamp YYYY-MM-DD
@@ -91,23 +91,33 @@ public class DMBServerExt
                             DirAndFile.createDirAndFile(date, dateAndTime, message);
                             tx.println("::received\n");
                         }
-                        else if (pduArr[0].equals("::fetch"))//if pdu from client is a fetch request 
+                        else if (pduArr[0].equals("::fetch"))//if PDU is ::fetch command
                         {
-                            String date = pduArr[2];
-                            if (Pattern.matches("^[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}$", date))//check date matches proper format
+                            if (pduArr.length == 2)//if client did not specify a date
                             {
-                                String response = MessageFinder.findMessages(date);
-                                System.out.println("Sending retrieved messages\n");
+                                TimeStamp timeStamp = new TimeStamp();
+                                String today = timeStamp.getSimpleDateFormat();//today's date
+                                String response = DirAndFile.findMessages(today);//today's messages
                                 tx.println(response);
                             }
-                            else//if date is of incorrect format
+                            else if (pduArr.length == 3)//if client did specify a date 
                             {
-                                tx.println("::error\n");
+                                String date = pduArr[2];//the date specified by client
+                                if (Pattern.matches("^[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}$", date))//check date matches proper format
+                                {
+                                    String response = DirAndFile.findMessages(date);
+                                    System.out.println("Sending retrieved messages\n");
+                                    tx.println(response);
+                                }
+                                else//if date is of incorrect format
+                                {
+                                    tx.println("::error\n");
+                                }
                             }
                         }
                         else//If pdu from client is neither a message or fetch request
                         {
-                            tx.println("Invalid Format! Invalid Message! \n::to <username> <message>\n::fetch <username> <date>\n");
+                            tx.println("Invalid Format! \n::to <username> <message>\n::fetch <username> <date>\n");
                         }
                         tx.flush();
                         tx.close();
@@ -149,7 +159,7 @@ public class DMBServerExt
         catch (IOException e){System.err.println("IOException: " + e.getMessage());}
 
         clientQ = new SimpleObjectQueue("ClientQ", maxClients);//for storing clients sending messages to server
-        messageQ = new SimpleObjectQueue("MessageQ", maxMessages);//for storing client messages
+        pduQ = new SimpleObjectQueue("pduQ", maxMessages);//for storing client messages
         timeStampQ = new SimpleObjectQueue("timeStampQ", maxMessages);//for storing message timestamps
     }//startServer
 }
