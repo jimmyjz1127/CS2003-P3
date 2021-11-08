@@ -63,7 +63,14 @@ public class DMBClientExt
                     String fullPDU = null;
                     if (pduArr.length == 3)//for format <::to/::fetch> <client username> <date/message>
                     {
-                        fullPDU = pduArr[0] + " " + System.getProperty("user.name") + " " + pduArr[2];
+                        if (pduArr[0].equals("::to"))//if client input is a ::to command
+                        {
+                            fullPDU = "::from" + " " + System.getProperty("user.name") + " " + pduArr[2];
+                        }
+                        else //if client input is a ::fetch command with a specified date
+                        {
+                            fullPDU = pduArr[0] + " " + System.getProperty("user.name") + " " + pduArr[2];
+                        }
                     }
                     else //for format <::fetch> <client username> 
                     {
@@ -74,14 +81,14 @@ public class DMBClientExt
                     if (fullPDU.length() > maxTextLen) 
                     {
                         System.out.println("++ You entered more than " + maxTextLen + "bytes ... truncating.");
-                        fullPDU = fullPDU.substring(0,maxTextLen-1);
+                        fullPDU = fullPDU.substring(0,maxTextLen);
                     }
                     
                     //Send pdu to server
                     System.out.println("Sending " + fullPDU.length() + " bytes");
                     tx.println(fullPDU);
 
-                    //Read response from server
+                    //Read and print response from server
                     String response;
                     while ((response = rx.readLine()) != null)//read and print response from server
                     {

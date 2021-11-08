@@ -12,14 +12,17 @@ import java.text.*;
 
 public class TimeStamp 
 {
-  private Date d;
-  private String dtf;
-  private String df;
+  private Date d;//date object
+  private String dtf;//date and time format (full timestamp format)
+  private String df;//date format
   private SimpleDateFormat sdtf;
   private SimpleDateFormat sdf;
-  private String dateTime;
-  private String date;
+  private String dateTime;//full timestamp
+  private String date;//date 
 
+  /**
+   * Constructor
+   */
   public TimeStamp()
   {
     d = new Date();
@@ -31,11 +34,17 @@ public class TimeStamp
     date = sdf.format(d);
   }
 
+  /**
+   * returns the date portion of the timestamp YYYY-mm-dd
+   */
   public String getSimpleDateFormat()
   {
     return date;
   }
 
+  /**
+   * returns the full timestamp YYYY-mm-dd_HH-mm-ss.SSS
+   */
   public String getSimpleDateTimeFormat()
   {
     return dateTime;

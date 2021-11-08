@@ -2,9 +2,10 @@
 FILE DESCRIPTIONS:
 
     src/ : contains the primary client-server files 
-      (I have included a Basic and Extended version of the DMBClient and DMBServer application)
+        - compileFiles.sh : when executed, compiles all java files
+      (I have included a Simple and Extended version of the DMBClient and DMBServer application)
         - DMBSimpleServer.java & DMBSimpleClient.java :
-            - Constitute a Basic DMB client-server application that satisfy practical requirements (R1 - R6) of practical instructions
+            - Constitute a Simple DMB client-server application that satisfy practical requirements (R1 - R6) of practical instructions
         - DMBServerExt.java & DMBClientExt.java :
             - Constitute an Extended DMB client-server application that satisfy all requirements (R1 - R10) of practical instructions
         - CS2003-usernames-2021.csv : csv containing all usernames in CS2003 and respective port numbers
@@ -34,6 +35,8 @@ HOW TO RUN:
     properties/DMBProperties.properties file must be edited : 
         - serverAddress must be changed to your host server
         - serverPort must be changed to your port number
+
+    Run compileFiles.sh to compile all java files 
     
     To run DMBSimpleClient.java & DMBSimpleServer.java:
         - DMBSimpleServer.java 
@@ -62,6 +65,7 @@ CS2003-P3/
 ├── TestingScreenShots/
 ├── README.md
 └── src/
+    ├── compileFiles.sh
     ├── CS2003-usernames-2021.csv
     ├── DMBClient.class
     ├── DMBClientExt.class

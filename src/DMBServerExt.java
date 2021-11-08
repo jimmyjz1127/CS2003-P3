@@ -15,7 +15,7 @@ public class DMBServerExt
 {
     private static Configuration configuration;
     
-    private static int port;
+    private static int serverPort;
     private static ServerSocket serverSocket;
 
     private static SimpleObjectQueue clientQ;//Queue for client connections
@@ -77,15 +77,15 @@ public class DMBServerExt
                     PrintWriter tx = new PrintWriter(new OutputStreamWriter(c.getOutputStream()));
 
                     String[] pduArr = pdu.split(" ", 3);
-                    if (pduArr.length >= 2)//check transmission has proper format <::fetch/::to> <username> <message/date(optiona)>
+                    if (pduArr.length >= 2)//check transmission has proper format <::fetch/::from> <username> <message/date(optiona)>
                     {
-                        if (pduArr[0].equals("::to") && pduArr.length == 3)//if PDU is ::to command
+                        if (pduArr[0].equals("::from") && pduArr.length == 3)//if client PDU is ::to command
                         {
                             TimeStamp timeStamp = (TimeStamp) timeStampQ.remove();
                             String date = timeStamp.getSimpleDateFormat();//Get the date part of timestamp YYYY-MM-DD
                             String dateAndTime = timeStamp.getSimpleDateTimeFormat();//Get both the date and time YYYY-MM-DD_HH-mm-ss.SSS
                             String username = pduArr[1];
-                            String message = "::from " + pduArr[1] + " " + pduArr[2];
+                            String message = pduArr[0] + " " + pduArr[1] + " " + pduArr[2];//::from <username> <message>
 
                             //create directory and file for message
                             DirAndFile.createDirAndFile(date, dateAndTime, message);
@@ -139,7 +139,7 @@ public class DMBServerExt
         {
             configuration = new Configuration("propertiesFiles/DMBProperties.properties");
 
-            port = configuration.serverPort;
+            serverPort = configuration.serverPort;
             maxClients = configuration.maxClients;
             maxMessages = configuration.maxMessages;
         }
@@ -153,7 +153,7 @@ public class DMBServerExt
     {
         try
         {
-            serverSocket = new ServerSocket(port);
+            serverSocket = new ServerSocket(serverPort);
             System.out.println("Server Started\n");
         }
         catch (IOException e){System.err.println("IOException: " + e.getMessage());}
