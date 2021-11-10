@@ -2,7 +2,7 @@ package messageboard;
 /**
   * Simple example creating a directory and a file.
   *
-  * based on code by Saleem Bhatti, 28 Aug 2019
+  * Based on code by Saleem Bhatti, 28 Aug 2019
   *
   */
 
@@ -81,6 +81,7 @@ public class DirAndFile
                         e.printStackTrace();
                     }
                 }//for
+                messages += "::end";
             }//if
         }//else
         System.out.println("Retrieved messages from: " + date + "\n");

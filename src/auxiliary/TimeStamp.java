@@ -2,7 +2,7 @@ package auxiliary;
 /**
   * TimeStamp object
   *
-  * Saleem Bhatti, https://saleem.host.cs.st-andrews.ac.uk/
+  * Based on code by Saleem Bhatti, https://saleem.host.cs.st-andrews.ac.uk/
   * 28 Aug 2019
   *
   */

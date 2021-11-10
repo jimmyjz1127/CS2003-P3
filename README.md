@@ -1,4 +1,4 @@
-------------------------------------------------
+------------------------------------------------------------
 FILE DESCRIPTIONS:
 
     src/ : contains the primary client-server files 
@@ -27,7 +27,7 @@ FILE DESCRIPTIONS:
     properties/ : contains all properties files
         - DMBProperties.properties : properties file for DMB Client and Server files
 
-------------------------------------------------
+-------------------------------------------------------------
 HOW TO RUN:
 
     CS2003-P3 parent folder must be moved to nginx_default directory
@@ -55,9 +55,11 @@ HOW TO RUN:
             - after executing, client uses scanner to wait for client requests 
             - User must type PDU (e.g. ::to <username> <message>) and click enter on their keyboard to send PDU to server
             - Control-C to terminate
+
+    To view my personal message board webpage : https://jz75.cs.st-andrews.ac.uk/cs2003/CS2003-P3/src/messageboard
     
 
-------------------------------------------------
+--------------------------------------------------------------
 FILE TREE:
 
 CS2003-P3/

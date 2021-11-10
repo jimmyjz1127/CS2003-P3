@@ -117,7 +117,7 @@ public class DMBServerExt
                         }
                         else//If pdu from client is neither a message or fetch request
                         {
-                            tx.println("Invalid Format! \n::to <username> <message>\n::fetch <username> <date>\n");
+                            tx.println("Invalid Format! \n::to <username> <message>\n::fetch <username> <date>");
                         }
                         tx.flush();
                         tx.close();

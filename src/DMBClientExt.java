@@ -38,7 +38,7 @@ public class DMBClientExt
                 
                 if (pduArr.length >= 2)
                 {
-                    String username = pduArr[1];
+                    String username = pduArr[1].toLowerCase();
                     int port = 0;
                     if (!userMap.containsKey(username))//if the given username is valid
                     {
@@ -85,7 +85,7 @@ public class DMBClientExt
                     }
                     
                     //Send pdu to server
-                    System.out.println("Sending " + fullPDU.length() + " bytes");
+                    System.out.println("Sending " + fullPDU.length() + " bytes\n");
                     tx.println(fullPDU);
 
                     //Read and print response from server
@@ -94,6 +94,7 @@ public class DMBClientExt
                     {
                         System.out.println(response);
                     }
+                    System.out.println();
                 }
                 else//if pdu is of incorrect format
                 {
